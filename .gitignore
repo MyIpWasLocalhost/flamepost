@@ -1,0 +1,23 @@
+# .NET Core build folders
+/bin
+/obj
+
+# Common node modules locations
+/node_modules
+/wwwroot/node_modules
+
+
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+#others
+/Properties
+post_data.db
+appsettings.json
+appsettings.Development.json
+.DS_Store

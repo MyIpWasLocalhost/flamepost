@@ -3,11 +3,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    filter:contrast(95%)
 }
 
 body {
     font-family: Arial, sans-serif;
-    background-color: cyan;
+    background-color: #333;
     color: #333;
 }
 
@@ -52,26 +53,31 @@ main {
 }
 
 .forum-category {
-    background-color: rgba(255, 255, 255, 0.7);
-    width: 600px;
+    background-color: #333;
+    width: 60vw;
     margin-bottom: 20px;
     padding: 15px;
     border-radius: 10px;
+    border:3px solid aliceblue;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .forum-category h2 {
     font-size: 1.8em;
-    color: #333;
+    color: whitesmoke;
 }
 
 .forum-category p {
     font-size: 1.1em;
-    color: #555;
+    color: whitesmoke;
+    word-break: break-all;
 }
 
+#serial{
+    font-size: 0.6em;
+}
 footer {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: #999;
     padding: 10px;
     text-align: center;
     border-top: 2px solid #ddd;
@@ -83,16 +89,31 @@ footer p {
     color: #333;
 }
 
+.poster{
+    width: 60vw;
+    height: 20vh;
+    border-radius: 20px;
+    border:chartreuse 3px solid;
+    align-items: center;
+}
+
 .post {
-    width: 400px;
-    height: 200px;
     text-align: center;
+    background-color: #333;
+    color:whitesmoke;
+    margin:10px;
+    width:90%;
+    top:2.5vh;
+    height: 15vh;
+    border-radius: 10px;
+    display:inline-block;
 }
 
 .post_button {
-    width : 300px;
-    height: 50px;
-    margin-top : 50px
+    height: 5vh;
+    position: absolute;
+    top: 7.5vh;
+    right: 20px;
 }
 
 .switchPage{
@@ -100,10 +121,10 @@ footer p {
     height: 30px;
 }
 
-.serial{
-    position: relative;
-    top:10px;
-    right: 20px;
+
+.name_input{
+    width: 400px;
+    height: 30px;
 }
 
 @media (max-width: 600px) {
@@ -121,11 +142,6 @@ footer p {
 
     .forum-category p {
         font-size: 1em;
-    }
-
-    .post {
-        width: 300px;
-        height: 150px;
     }
     
 }

@@ -32,6 +32,7 @@ async function fetchData() {
                 gridItem.innerHTML = `
                     <h2>${item.author}</h2>
                     <p>${item.content}</p>
+                    <p id="serial">#${item.tier+1}</p>
                 `;
                 gridContainer.appendChild(gridItem);
             }
@@ -50,9 +51,8 @@ async function fetchData() {
                 gridItem.className = 'forum-category';
                 gridItem.innerHTML = `
                     <h2>${item.author}</h2>
-                    <p id="serial>${item.tier+1}</p>
                     <p>${item.content}</p>
-
+                    <p id="serial">#${item.tier+1}</p>
                 `;
                 gridContainer.appendChild(gridItem);
         }

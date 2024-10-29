@@ -6,7 +6,7 @@
 /node_modules
 /wwwroot/node_modules
 
-
+./idea
 
 .vscode/*
 !.vscode/settings.json
@@ -21,3 +21,4 @@ post_data.db
 appsettings.json
 appsettings.Development.json
 .DS_Store
+.fake

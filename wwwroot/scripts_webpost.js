@@ -90,7 +90,7 @@ async function fetchData() {
 
 async function post(){
     //read the content of the post and send it to the backend
-    let content = { "content" : document.getElementsByClassName('post')[0].value};
+    let content = { "content" : document.getElementsByClassName('post_area')[0].value};
     const response = await fetch('/api/send',{
         method : 'POST',
         headers:{

@@ -8,6 +8,8 @@
 
 ./idea
 
+flamepost.sln
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

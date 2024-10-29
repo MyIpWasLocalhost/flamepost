@@ -12,6 +12,10 @@ body {
     color: #333;
 }
 
+#page-container{
+    min-height: 100vh;
+}
+
 header {
     background-color: rgba(255, 255, 255, 0.8);
     padding: 20px;
@@ -82,6 +86,10 @@ footer {
     text-align: center;
     border-top: 2px solid #ddd;
     margin-top: 50px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    
 }
 
 footer p {
@@ -95,25 +103,31 @@ footer p {
     border-radius: 20px;
     border:chartreuse 3px solid;
     align-items: center;
+    margin-top: 30px;
+    margin-bottom: 70px;
 }
 
-.post {
+.post_area {
+    position: absolute;
     text-align: center;
+    width: 54vw;
+    left: 3vw;
+    right:3vw;
+    top: 1vh;
+    height: 10vh;
     background-color: #333;
     color:whitesmoke;
-    margin:10px;
-    width:90%;
-    top:2.5vh;
-    height: 15vh;
     border-radius: 10px;
     display:inline-block;
 }
 
-.post_button {
-    height: 5vh;
+.post_button{
     position: absolute;
-    top: 7.5vh;
-    right: 20px;
+    top: 12.5vh;
+    width: 54vw;
+    height: 5vh;
+    left:3vw;
+    border-radius: 10px;
 }
 
 .switchPage{
@@ -127,13 +141,13 @@ footer p {
     height: 30px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 800px) {
     main {
         padding: 10px;
     }
 
     .forum-category {
-        width: 300px;
+        width: 100vw;
     }
 
     .forum-category h2 {
@@ -142,6 +156,27 @@ footer p {
 
     .forum-category p {
         font-size: 1em;
+    }
+
+    .poster{
+        width: 100vw;
+        height: 30vh;
+    }
+
+    .post {
+        width: 90vw;
+        left: 5vw;
+        right: 5vw;
+        top: 0;
+        height: 20vh;
+    }
+
+    .post_button{
+        top: 22vh;
+        width: 90vw;
+        height: 5vh;
+        left:5%;
+        border-radius: 10px;
     }
     
 }

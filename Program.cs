@@ -102,7 +102,10 @@ public partial class StartService
                 var tier = viewPostsCommand.ExecuteScalar();
 
                 insertPostCommand.CommandText = @"
-                    INSERT INTO post_at_000001 (content, author, tier) VALUES ('" + postedData.content + "', 'Anonymous User', " + tier + ")";
+                    INSERT INTO post_at_000001 (content, author, tier) VALUES ($content, $author, $tier)";
+                insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
+                insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
+                insertPostCommand.Parameters.AddWithValue("$tier", tier);
                 insertPostCommand.ExecuteNonQuery();
                 response = "post success";
             }

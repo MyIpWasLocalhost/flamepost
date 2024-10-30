@@ -3,12 +3,20 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    filter:contrast(95%)
 }
 
-body {
+main {
     font-family: Arial, sans-serif;
-    background-color: cyan;
+    background-color: #333;
     color: #333;
+}
+body {
+    background-color: #333;
+}
+
+#page-container{
+    min-height: 100vh;
 }
 
 header {
@@ -16,11 +24,6 @@ header {
     padding: 20px;
     text-align: center;
     border-bottom: 2px solid #ddd;
-}
-
-header h1 {
-    font-size: 2.5em;
-    color: #333;
 }
 
 nav ul {
@@ -71,6 +74,9 @@ main {
 }
 
 footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
     background-color: rgba(255, 255, 255, 0.8);
     padding: 10px;
     text-align: center;

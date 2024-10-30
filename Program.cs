@@ -31,8 +31,6 @@ public partial class StartService
         createChartCommand.ExecuteNonQuery();
 
         //create the api for getting the content from existed posts
-        //only supporting post 000001 for now
-        //TBD:modify on to the api, and make it work on multiple posts
         app.MapGet("/api/data/{postId:regex(^\\d{{6}}$)}", async (HttpContext context, string postId) =>
         {
             var posts = new List<object>();
@@ -74,8 +72,6 @@ public partial class StartService
         });
 
         //using "domain/p/postid" like form to access to the posts.
-        //only supporting post 000001 for now
-        //TBD:modify on to the hosting, and make it work on multiple posts
 
         app.MapGet("/p/{postId}", async (HttpContext context, string postId) =>
         {   //To be done: use the id check if the post exists

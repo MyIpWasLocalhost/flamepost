@@ -14,6 +14,7 @@ public partial class StartService
         var builder = WebApplication.CreateBuilder(args);
         var app = builder.Build();
         app.UseStaticFiles();
+        app.UseRouting();
 
         //initialize on the databse connection
         string connectionString = "Data Source=post_data.db";
@@ -32,25 +33,33 @@ public partial class StartService
         //create the api for getting the content from existed posts
         //only supporting post 000001 for now
         //TBD:modify on to the api, and make it work on multiple posts
-        app.MapGet("/api/data/000001", async (HttpContext context) =>
+        app.MapGet("/api/data/{postId:regex(^\\d{{6}}$)}", async (HttpContext context, string postId) =>
         {
             var posts = new List<object>();
+            //Query the database for the posts
             var getPostsCommand = connection.CreateCommand();
-            getPostsCommand.CommandText = "SELECT * FROM post_at_000001";
-            using (var reader = getPostsCommand.ExecuteReader())
+            if ( postId.Length != 6 || !int.TryParse(postId, out _))
             {
-                while (reader.Read())
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("Post not found");
+                return;
+            }else{
+                getPostsCommand.CommandText = $"SELECT * FROM post_at_{postId}";
+                using (var reader = getPostsCommand.ExecuteReader())
                 {
-                    posts.Add(new
+                    while (reader.Read())
                     {
-                        content = reader.GetString(0),
-                        author = reader.GetString(1),
-                        tier = reader.GetInt32(2)
-                    });
+                        posts.Add(new
+                        {
+                            content = reader.GetString(0),
+                            author = reader.GetString(1),
+                            tier = reader.GetInt32(2)
+                        });
+                    }
                 }
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsJsonAsync(posts);
             }
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsJsonAsync(posts);
         });
 
         app.MapGet("/", async context =>
@@ -68,8 +77,8 @@ public partial class StartService
         //only supporting post 000001 for now
         //TBD:modify on to the hosting, and make it work on multiple posts
 
-        app.MapGet("/p/000001", async context =>
-        {
+        app.MapGet("/p/{postId}", async (HttpContext context, string postId) =>
+        {   //To be done: use the id check if the post exists
             context.Response.ContentType = "text/html";
             await context.Response.SendFileAsync("./wwwroot/webpost.html");
         });
@@ -90,19 +99,19 @@ public partial class StartService
 
         //recieve post request from frontend and then insert it into the database.
 
-        app.MapPost("/api/send", async (HttpContext context) =>
+        app.MapPost("/api/send/{postId:regex(^\\d{{6}}$)}", async (HttpContext context, string postId) =>
         {
             var postedData = await context.Request.ReadFromJsonAsync<PostData>();
             var response = "";
-            if (!(postedData == null || string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200))
+            if (!(postedData == null || string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200 || postId.Length != 6 || !int.TryParse(postId, out _)))
             {
                 var insertPostCommand = connection.CreateCommand();
                 var viewPostsCommand = connection.CreateCommand();
-                viewPostsCommand.CommandText = @"SELECT COUNT(*) FROM post_at_000001";
+                viewPostsCommand.CommandText = @"SELECT COUNT(*) FROM post_at_" + postId;
                 var tier = viewPostsCommand.ExecuteScalar();
 
-                insertPostCommand.CommandText = @"
-                    INSERT INTO post_at_000001 (content, author, tier) VALUES ($content, $author, $tier)";
+                insertPostCommand.CommandText = @$"
+                    INSERT INTO post_at_{postId} (content, author, tier) VALUES ($content, $author, $tier)";
                 insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
                 insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
                 insertPostCommand.Parameters.AddWithValue("$tier", tier);

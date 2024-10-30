@@ -170,11 +170,11 @@ footer p {
         height: 30vh;
     }
 
-    .post {
+    .post_area{
         width: 90vw;
         left: 5vw;
         right: 5vw;
-        top: 0;
+        top: 1vh;
         height: 20vh;
     }
 

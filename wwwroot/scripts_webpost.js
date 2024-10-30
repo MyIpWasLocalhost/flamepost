@@ -25,11 +25,11 @@ async function fetchData() {
     const response = await fetch('/api/data/' + getSerial());
     const data = await response.json();
     const gridContainer = document.getElementById('grid-container');
-    const replyAmount = data.length - 1;
-    pages = Math.floor(replyAmount / 10);
+    const replyAmount = Object.keys(data).length;
+    pages = Math.floor(replyAmount / 10) ===0 ? 1 : Math.floor(replyAmount / 10);
     //implement the logic for generating the last page
     if (pages === onpage){
-        for (let i = onpage * 10 ; i < data.length; i++){
+        for (let i = onpage * 10 ; i < replyAmount; i++){
             const item = data.find(function (item){
                 return item.tier === i;
             });
@@ -102,7 +102,7 @@ async function fetchData() {
 async function post(){
     //read the content of the post and send it to the backend
     let content = { "content" : document.getElementsByClassName('post_area')[0].value};
-    const response = await fetch('/api/send',{
+    const response = await fetch('/api/send/' + getSerial(),{
         method : 'POST',
         headers:{
             'Content-Type':  'application/json'

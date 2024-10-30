@@ -56,10 +56,15 @@ main {
     align-items: center;
 }
 
+.grid-container {
+    border: #ddd 2px solid;
+    border-radius: 5px;
+}
 .forum-category {
+
     background-color: #333;
     width: 60vw;
-    margin-bottom: 20px;
+    margin: 20px;
     padding: 15px;
     border-radius: 10px;
     border:3px solid aliceblue;
@@ -80,6 +85,8 @@ main {
 #serial{
     font-size: 0.6em;
 }
+
+
 footer {
     background-color: #999;
     padding: 10px;

@@ -7,6 +7,14 @@ window.onload = function(){
         onpage = parseInt(sessionStorage.getItem("onpage"));
     }
 }
+//escape html to prevent xss injection
+//copied from stackoverflow
+function escapeHtml(html){
+    var text = document.createTextNode(html);
+    var p = document.createElement('p');
+    p.appendChild(text);
+    return p.innerHTML;
+  }
 //get the serial id of current post from the url
 function getSerial(){
     let serial = window.location.pathname.substring(3);
@@ -17,15 +25,16 @@ async function fetchData() {
     const response = await fetch('/api/data/' + getSerial());
     const data = await response.json();
     const gridContainer = document.getElementById('grid-container');
-    const replyAmount = data.length;
+    const replyAmount = data.length - 1;
     pages = Math.floor(replyAmount / 10);
     //implement the logic for generating the last page
     if (pages === onpage){
-        for (let i = onpage * 10 ; i < (onpage + 1) * 10; i++){
+        for (let i = onpage * 10 ; i < data.length; i++){
             const item = data.find(function (item){
                 return item.tier === i;
             });
-
+            item.author = escapeHtml(item.author);
+            item.content = escapeHtml(item.content);
             if (item && i <= replyAmount){
                 const gridItem = document.createElement('div');
                 gridItem.className = 'forum-category';
@@ -47,6 +56,8 @@ async function fetchData() {
             const item = data.find(function (item){
                 return item.tier === i;
             });
+                item.author = escapeHtml(item.author);
+                item.content = escapeHtml(item.content);
                 const gridItem = document.createElement('div');
                 gridItem.className = 'forum-category';
                 gridItem.innerHTML = `

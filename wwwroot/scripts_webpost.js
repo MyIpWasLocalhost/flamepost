@@ -111,6 +111,7 @@ async function post(){
     }).then(response => response.text());
     if (response === "post success"){
         callUpAlert("post success, page reload in 5 seconds", true);
+        sessionStorage.setItem("onpage", onpage);
         setTimeout(function(){
         location.reload()
         }, 5000)

@@ -103,7 +103,7 @@ public partial class StartService
             {
                 var insertPostCommand = connection.CreateCommand();
                 var viewPostsCommand = connection.CreateCommand();
-                viewPostsCommand.CommandText = @"SELECT COUNT(*) FROM post_at_" + postId;
+                viewPostsCommand.CommandText = @$"SELECT COUNT(*) FROM post_at_{postId}";
                 var tier = viewPostsCommand.ExecuteScalar();
 
                 insertPostCommand.CommandText = @$"

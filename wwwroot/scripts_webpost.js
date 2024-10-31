@@ -110,10 +110,13 @@ async function post(){
         body: JSON.stringify(content)
     }).then(response => response.text());
     if (response === "post success"){
+        callUpAlert("post success, page reload in 5 seconds", true);
+        setTimeout(function(){
         location.reload()
+        }, 5000)
+    }else{
+        callUpAlert(response, false);
     }
-    alert(response);
-    console.log(response);
 
 }
 
@@ -124,11 +127,17 @@ function switchpage(toPage, direction = 'default'){
         case 'right':
             if (onpage < pages){
                 onpage = onpage + 1;
+            }else{
+                callUpAlert('You are already on the last page', false);
+                return;
             }
             break;
         case 'left':
             if (onpage >= 1){
                 onpage = onpage - 1;
+            }else{
+                callUpAlert('You are already on the first page', false);
+                return;
             }
             break;
         default:
@@ -137,6 +146,20 @@ function switchpage(toPage, direction = 'default'){
     }
     sessionStorage.setItem("onpage", onpage);
     location.reload();
+}
+function callUpAlert(message, isGood){
+    const alert = document.getElementById('alert');
+    const alertExisting = alert.style.visibility === 'visible';
+    alert.innerHTML = `<p>${message}</p>`;
+    alert.style.backgroundColor = isGood ? '#90ee90' : '#f8766d';
+    alert.style.visibility = 'visible';
+    alert.classList.add('scale-up-center');
+    if (!alertExisting){
+        setTimeout(function hidealert(){
+            alert.classList.remove('scale-up-center');
+            alert.style.visibility = 'hidden';
+        }, 5000);
+    }
 }
 //initialize
 fetchData();

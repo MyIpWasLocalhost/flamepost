@@ -10,7 +10,8 @@ Flamepost is an opensourced, web service project. It was aimed to be free, anony
 - show the post contents on the frontend
 
 ## To-Do List
-- [ ] Backend Refactor: API completion for applying to all the posts
+
+- [X] Backend Refactor: API completion for applying to all the posts
 - [ ] Page Refactor: homepage display listing of the newest posted/replied post
 - [ ] Page Refactor: aethesetics
 - [ ] Page Refactor: guidelines, unsecure post warnings, and disclaimer
@@ -29,18 +30,18 @@ Flamepost is an opensourced, web service project. It was aimed to be free, anony
 - `Flamepost.csproj` project file for flamepost.
 
 ## Run the project
+
 0. Flamepost was designed on top of .NET CORE 8.0. Please correctly install the dependency.
 1. clone the project：
-    ```sh
-    git clone https://github.com/MyIpWasLocalhost/flamepost
-    cd flamepost
-    ```
 
+   ```sh
+   git clone https://github.com/MyIpWasLocalhost/flamepost
+   cd flamepost
+   ```
 2. Install dependencies and run the project：
-    ```sh
-    dotnet restore
-    dotnet run
-    ```
 
+   ```sh
+   dotnet restore
+   dotnet run
+   ```
 3. Open the browser and enter `localhost:1090` to browse the content
-

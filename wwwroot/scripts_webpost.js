@@ -6,6 +6,7 @@ window.onload = function(){
     if (sessionStorage.getItem("onpage") != null){
         onpage = parseInt(sessionStorage.getItem("onpage"));
     }
+    fetchData();
 }
 //escape html to prevent xss injection
 //copied from stackoverflow
@@ -26,7 +27,7 @@ async function fetchData() {
     const data = await response.json();
     const gridContainer = document.getElementById('grid-container');
     const replyAmount = Object.keys(data).length;
-    pages = Math.floor(replyAmount / 10) ===0 ? 1 : Math.floor(replyAmount / 10);
+    pages = Math.floor( (replyAmount-1) / 10 );
     //implement the logic for generating the last page
     if (pages === onpage){
         for (let i = onpage * 10 ; i < replyAmount; i++){
@@ -111,6 +112,7 @@ async function post(){
     }).then(response => response.text());
     if (response === "post success"){
         callUpAlert("post success, page reload in 5 seconds", true);
+        document.getElementsByClassName('post_area')[0].value = '';
         sessionStorage.setItem("onpage", onpage);
         setTimeout(function(){
         location.reload()
@@ -162,5 +164,3 @@ function callUpAlert(message, isGood){
         }, 5000);
     }
 }
-//initialize
-fetchData();

@@ -19,6 +19,19 @@ function timestampToDate(timestamp){
     let formattedTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
     return formattedTime;   
 }
+function createPostDisplay(item){
+    const gridItem = document.createElement('div');
+    let time = timestampToDate(item.timestamp);
+    item.author = escapeHtml(item.author);
+    item.content = escapeHtml(item.content);
+    gridItem.className = 'forum-category';
+    gridItem.innerHTML = `
+        <h2>${item.author}</h2>
+        <p>${item.content}</p>
+        <p id="serial">#${item.tier+1}, posted at ${time}</p>
+    `;
+    return gridItem;
+}
 //escape html to prevent xss injection
 //copied from stackoverflow
 function escapeHtml(html){
@@ -45,17 +58,9 @@ async function fetchData() {
             const item = data.find(function (item){
                 return item.tier === i;
             });
-            let time = timestampToDate(item.timestamp);
-            item.author = escapeHtml(item.author);
-            item.content = escapeHtml(item.content);
+
             if (item && i <= replyAmount){
-                const gridItem = document.createElement('div');
-                gridItem.className = 'forum-category';
-                gridItem.innerHTML = `
-                    <h2>${item.author}</h2>
-                    <p>${item.content}</p>
-                    <p id="serial">#${item.tier+1}, posted at ${time}</p>
-                `;
+                const gridItem = createPostDisplay(item);
                 gridContainer.appendChild(gridItem);
             }
             else{
@@ -69,16 +74,7 @@ async function fetchData() {
             const item = data.find(function (item){
                 return item.tier === i;
             });
-                item.author = escapeHtml(item.author);
-                item.content = escapeHtml(item.content);
-                let time = timestampToDate(item.timestamp);
-                const gridItem = document.createElement('div');
-                gridItem.className = 'forum-category';
-                gridItem.innerHTML = `
-                    <h2>${item.author}</h2>
-                    <p>${item.content}</p>
-                    <p id="serial">#${item.tier+1}, posted at ${time}</p>
-                `;
+                const gridItem = createPostDisplay(item);
                 gridContainer.appendChild(gridItem);
         }
     }

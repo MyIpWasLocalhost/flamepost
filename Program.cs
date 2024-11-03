@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Data.Sqlite;
+using System.Runtime;
 public class PostData
 {
         public string content { get; set; } = string.Empty;
@@ -51,7 +52,8 @@ public partial class StartService
                         {
                             content = reader.GetString(0),
                             author = reader.GetString(1),
-                            tier = reader.GetInt32(2)
+                            tier = reader.GetInt32(2),
+                            timestamp = reader.GetInt64(3)
                         });
                     }
                 }
@@ -107,10 +109,11 @@ public partial class StartService
                 var tier = viewPostsCommand.ExecuteScalar();
 
                 insertPostCommand.CommandText = @$"
-                    INSERT INTO post_at_{postId} (content, author, tier) VALUES ($content, $author, $tier)";
+                    INSERT INTO post_at_{postId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
                 insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
                 insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
                 insertPostCommand.Parameters.AddWithValue("$tier", tier);
+                insertPostCommand.Parameters.AddWithValue("$timestamp", DateTimeOffset.Now.ToUnixTimeSeconds());
                 insertPostCommand.ExecuteNonQuery();
                 response = "post success";
             }

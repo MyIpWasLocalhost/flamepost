@@ -8,6 +8,17 @@ window.onload = function(){
     }
     fetchData();
 }
+function timestampToDate(timestamp){
+    const date = new Date(timestamp * 1000);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    let formattedTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    return formattedTime;   
+}
 //escape html to prevent xss injection
 //copied from stackoverflow
 function escapeHtml(html){
@@ -34,6 +45,7 @@ async function fetchData() {
             const item = data.find(function (item){
                 return item.tier === i;
             });
+            let time = timestampToDate(item.timestamp);
             item.author = escapeHtml(item.author);
             item.content = escapeHtml(item.content);
             if (item && i <= replyAmount){
@@ -42,7 +54,7 @@ async function fetchData() {
                 gridItem.innerHTML = `
                     <h2>${item.author}</h2>
                     <p>${item.content}</p>
-                    <p id="serial">#${item.tier+1}</p>
+                    <p id="serial">#${item.tier+1}, posted at ${time}</p>
                 `;
                 gridContainer.appendChild(gridItem);
             }
@@ -59,12 +71,13 @@ async function fetchData() {
             });
                 item.author = escapeHtml(item.author);
                 item.content = escapeHtml(item.content);
+                let time = timestampToDate(item.timestamp);
                 const gridItem = document.createElement('div');
                 gridItem.className = 'forum-category';
                 gridItem.innerHTML = `
                     <h2>${item.author}</h2>
                     <p>${item.content}</p>
-                    <p id="serial">#${item.tier+1}</p>
+                    <p id="serial">#${item.tier+1}, posted at ${time}</p>
                 `;
                 gridContainer.appendChild(gridItem);
         }

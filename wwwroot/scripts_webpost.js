@@ -50,8 +50,8 @@ async function fetchData() {
     const response = await fetch('/api/data/' + getSerial());
     const data = await response.json();
     const gridContainer = document.getElementById('grid-container');
-    const replyAmount = Object.keys(data).length;
-    pages = Math.floor( (replyAmount-1) / 10 );
+    const replyAmount = Object.keys(data).length -1;
+    pages = Math.floor( (replyAmount -1 ) / 10 );
     //implement the logic for generating the last page
     if (pages === onpage){
         for (let i = onpage * 10 ; i < replyAmount; i++){
@@ -105,8 +105,15 @@ async function fetchData() {
         pageContainer.appendChild(page);
         
     }
+    const titleHolder = document.getElementById('title');
+    let title = escapeHtml(data[0].title);
+    let created_time = timestampToDate(data[0].created_timestamp);
+    let latest_timestamp_time = timestampToDate(data[0].latest_timestamp);
+    titleHolder.innerHTML = `${title}`;
     const pageDisplayer = document.getElementById('onpage');
-    pageDisplayer.innerHTML = `Now On Page ${onpage+1}`;
+    pageDisplayer.innerHTML = `Now On Page ${onpage+1}/${pages+1}`;
+    const postInfoHolder = document.getElementById('post_info');
+    postInfoHolder.innerHTML = `Created at ${created_time}, last replied at ${latest_timestamp_time}`;
 }
 
 async function post(){

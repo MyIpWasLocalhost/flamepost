@@ -35,6 +35,26 @@ public partial class StartService
         app.MapGet("/api/data/{postId:regex(^\\d{{6}}$)}", async (HttpContext context, string postId) =>
         {
             var posts = new List<object>();
+            var get_posts_serial_information = connection.CreateCommand();
+            get_posts_serial_information.CommandText = "SELECT * FROM posts_serial WHERE id = $id";
+            get_posts_serial_information.Parameters.AddWithValue("$id", postId);
+            using (var reader = get_posts_serial_information.ExecuteReader())
+            {
+                if (!reader.Read())
+                {
+                    context.Response.StatusCode = 404;
+                    await context.Response.WriteAsync("Post not found");
+                    return;
+                }else{
+                    posts.Add(new
+                    {
+                        tier = "content_header",
+                        title = reader.GetString(1),
+                        created_timestamp = reader.GetInt64(2),
+                        latest_timestamp = reader.GetInt64(3)
+                    });
+                }
+            }
             //Query the database for the posts
             var getPostsCommand = connection.CreateCommand();
             if ( postId.Length != 6 || !int.TryParse(postId, out _))
@@ -107,13 +127,22 @@ public partial class StartService
                 var viewPostsCommand = connection.CreateCommand();
                 viewPostsCommand.CommandText = @$"SELECT COUNT(*) FROM post_at_{postId}";
                 var tier = viewPostsCommand.ExecuteScalar();
-
+                //insert post content
                 insertPostCommand.CommandText = @$"
                     INSERT INTO post_at_{postId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
+                long time = DateTimeOffset.Now.ToUnixTimeSeconds();
                 insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
                 insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
                 insertPostCommand.Parameters.AddWithValue("$tier", tier);
-                insertPostCommand.Parameters.AddWithValue("$timestamp", DateTimeOffset.Now.ToUnixTimeSeconds());
+                insertPostCommand.Parameters.AddWithValue("$timestamp", time);
+                //update the post time in the post_serial
+                var updatePostTimeCommand = connection.CreateCommand();
+                updatePostTimeCommand.CommandText = @$"
+                    UPDATE posts_serial SET latest_timestamp = $new_timestamp WHERE id = $id";
+                updatePostTimeCommand.Parameters.AddWithValue("$new_timestamp", time);
+                updatePostTimeCommand.Parameters.AddWithValue("$id", postId);
+
+                updatePostTimeCommand.ExecuteNonQuery();
                 insertPostCommand.ExecuteNonQuery();
                 response = "post success";
             }
@@ -140,6 +169,5 @@ public partial class StartService
         app.Urls.Add("http://*:1090");
         
         app.Run();
-
     }
 }

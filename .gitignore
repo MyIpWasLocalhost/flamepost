@@ -24,3 +24,4 @@ appsettings.json
 appsettings.Development.json
 .DS_Store
 .fake
+/wwwroot/.DS_Store

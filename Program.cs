@@ -14,7 +14,6 @@ public partial class StartService
         //initialize the web application
         var builder = WebApplication.CreateBuilder(args);
         var app = builder.Build();
-        app.UseStaticFiles();
         app.UseRouting();
 
         //initialize on the databse connection
@@ -43,7 +42,7 @@ public partial class StartService
                 if (!reader.Read())
                 {
                     context.Response.StatusCode = 404;
-                    await context.Response.WriteAsync("Post not found");
+                    await context.Response.SendFileAsync("./wwwroot/content_404.html");
                     return;
                 }else{
                     posts.Add(new
@@ -96,23 +95,20 @@ public partial class StartService
         //using "domain/p/postid" like form to access to the posts.
 
         app.MapGet("/p/{postId}", async (HttpContext context, string postId) =>
-        {   //To be done: use the id check if the post exists
+        {   
+            var get_posts_serial_information = connection.CreateCommand();
+            get_posts_serial_information.CommandText = "SELECT COUNT(*) FROM posts_serial WHERE id = $id";
+            get_posts_serial_information.Parameters.AddWithValue("$id", postId);
+            var count = get_posts_serial_information.ExecuteScalar();
+            if (postId.Length != 6 || !int.TryParse(postId, out _)|| (long)count == 0)
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.SendFileAsync("./wwwroot/content_404.html");
+                return;
+            }
+            // To be done: use the id check if the post exists
             context.Response.ContentType = "text/html";
             await context.Response.SendFileAsync("./wwwroot/webpost.html");
-        });
-
-        //create pathway to the css and js file
-
-        app.MapGet("/p/styles_webpost.css", async context =>
-        {
-            context.Response.ContentType = "text/css";
-            await context.Response.SendFileAsync("./wwwroot/styles_webpost.css");
-        });
-
-        app.MapGet("/p/scripts_webpost.js", async context =>
-        {
-            context.Response.ContentType = "text/javascript";
-            await context.Response.SendFileAsync("./wwwroot/scripts_webpost.js");
         });
 
         //recieve post request from frontend and then insert it into the database.
@@ -166,8 +162,16 @@ public partial class StartService
             await context.Response.WriteAsync(response);
         });
 
+        app.MapFallback(async context =>
+        {
+            context.Response.StatusCode = 404;
+            await context.Response.SendFileAsync("./wwwroot/content_404.html");
+        });
+
         app.Urls.Add("http://*:1090");
         
+        app.UseStaticFiles();
+
         app.Run();
     }
 }

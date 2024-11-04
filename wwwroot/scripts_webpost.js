@@ -1,13 +1,18 @@
 //create variable for currentpage and total pages
 var onpage = 0
 var pages = 0
-//check if there's sessionstorage from past browsing, if so, load it on to the current page
+var data, replyAmount;
+
 window.onload = function(){
-    if (sessionStorage.getItem("onpage") != null){
-        onpage = parseInt(sessionStorage.getItem("onpage"));
+    //get the current page from the url
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('page')){
+    onpage = parseInt(urlParams.get('page')) - 1;
+    window.history.replaceState({}, document.title, "/p/" + getSerial());
     }
     fetchData();
 }
+
 function timestampToDate(timestamp){
     const date = new Date(timestamp * 1000);
     const year = date.getFullYear();
@@ -19,6 +24,7 @@ function timestampToDate(timestamp){
     let formattedTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
     return formattedTime;   
 }
+
 function createPostDisplay(item){
     const gridItem = document.createElement('div');
     let time = timestampToDate(item.timestamp);
@@ -32,6 +38,7 @@ function createPostDisplay(item){
     `;
     return gridItem;
 }
+
 //escape html to prevent xss injection
 //copied from stackoverflow
 function escapeHtml(html){
@@ -39,20 +46,18 @@ function escapeHtml(html){
     var p = document.createElement('p');
     p.appendChild(text);
     return p.innerHTML;
-  }
+}
+
 //get the serial id of current post from the url
 function getSerial(){
-    let serial = window.location.pathname.substring(3);
+    let serial = window.location.pathname.substring(3,9);
     return serial;
 }
-//get the data from the backend and generating the forum posts
-async function fetchData() {
-    const response = await fetch('/api/data/' + getSerial());
-    const data = await response.json();
+
+function generatePage(){
     const gridContainer = document.getElementById('grid-container');
-    const replyAmount = Object.keys(data).length -1;
-    pages = Math.floor( (replyAmount -1 ) / 10 );
-    //implement the logic for generating the last page
+    gridContainer.innerHTML = '';
+
     if (pages === onpage){
         for (let i = onpage * 10 ; i < replyAmount; i++){
             const item = data.find(function (item){
@@ -73,6 +78,22 @@ async function fetchData() {
                 gridContainer.appendChild(gridItem);
         }
     }
+}
+
+//get the data from the backend and generating the forum posts
+async function fetchData() {
+    const response = await fetch('/api/data/' + getSerial());
+    data = await response.json();
+    replyAmount = Object.keys(data).length -1;
+    pages = Math.floor( (replyAmount -1 ) / 10 );
+    if (onpage > pages){
+        callUpAlert('Page not found, redirecting to the first page in 5 seconds.', false);
+        setTimeout(function(){
+            window.location.href = `/p/${getSerial()}`;
+        }, 5000);
+    }
+    //call function to generate the page
+    generatePage(data, replyAmount);
     //handling the generation of the page switcher
     const pageContainer = document.getElementById('switchPageContainer');
     //+2 for prev and next button
@@ -125,9 +146,8 @@ async function post(){
     if (response === "post success"){
         callUpAlert("post success, page reload in 5 seconds", true);
         document.getElementsByClassName('post_area')[0].value = '';
-        sessionStorage.setItem("onpage", onpage);
         setTimeout(function(){
-        location.reload()
+            window.location.href = `/p/${getSerial()}?page=${onpage+1}`;
         }, 5000)
     }else{
         callUpAlert(response, false);
@@ -159,8 +179,7 @@ function switchpage(toPage, direction = 'default'){
             onpage = toPage;
             break;
     }
-    sessionStorage.setItem("onpage", onpage);
-    location.reload();
+    generatePage();
 }
 function callUpAlert(message, isGood){
     const alert = document.getElementById('alert');

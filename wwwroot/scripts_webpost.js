@@ -58,18 +58,13 @@ async function fetchData() {
             const item = data.find(function (item){
                 return item.tier === i;
             });
-
-            if (item && i <= replyAmount){
                 const gridItem = createPostDisplay(item);
                 gridContainer.appendChild(gridItem);
-            }
-            else{
-                break;
-            }
         }
     }
     //implement the logic for generating the other pages
-    else{
+    else
+    {
         for (let i = onpage * 10 ; i < (onpage + 1) * 10; i++){
             const item = data.find(function (item){
                 return item.tier === i;
@@ -80,7 +75,8 @@ async function fetchData() {
     }
     //handling the generation of the page switcher
     const pageContainer = document.getElementById('switchPageContainer');
-    for (i = 0; i <= pages+2; i++){//+2 for prev and next
+    //+2 for prev and next button
+    for (i = 0; i <= pages+2; i++){
         const page = document.createElement('button');
         page.className = 'switchPage';
         switch (i){

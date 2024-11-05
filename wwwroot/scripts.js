@@ -33,6 +33,7 @@ function generatepost(item){
         <h2><a href="${url}">${item.title}</a></h2>
         <p>posted at ${created_time}, replied at ${latest_time}</p>
     `;
+    posts_generated++;
     return gridItem;
 }
 window.onload = async function(){
@@ -44,3 +45,14 @@ window.onload = async function(){
         document.getElementById('grid-container').appendChild(gridItem);
     }
 };
+window.addEventListener('scroll', function(){
+    if (window.scrollY + window.innerHeight >= document.body.offsetHeight - 50 ){
+            if (posts_generated >= data.length){
+                return;
+            }else{
+            const item = data[posts_generated];
+            const gridItem = generatepost(item);
+            document.getElementById('grid-container').appendChild(gridItem);
+            }
+        }
+    });

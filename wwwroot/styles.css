@@ -3,7 +3,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    filter:contrast(95%)
+    filter:contrast(95%);
+    font-family: 'Vera Sans Mono', monospace;
 }
 
 main {
@@ -17,6 +18,27 @@ body {
 
 #page-container{
     min-height: 100vh;
+}
+
+.post_display {
+    height: 15vh;
+    width: 80vw;
+    right:0;
+    align-self:right;
+    color:azure;
+    border-top: black 2px solid;
+    margin-bottom: 70px;
+}
+
+.post_display h2 {
+    margin-top: 10px;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.post_display a{
+    color:azure;
+    text-decoration: none;
 }
 
 header {

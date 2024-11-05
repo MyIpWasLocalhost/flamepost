@@ -3,7 +3,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    filter:contrast(95%)
+    filter:contrast(95%);
+    font-family: 'Vera Sans Mono', monospace;
 }
 
 body {

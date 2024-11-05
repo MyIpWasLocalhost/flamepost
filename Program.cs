@@ -99,16 +99,37 @@ public partial class StartService
             var get_posts_serial_information = connection.CreateCommand();
             get_posts_serial_information.CommandText = "SELECT COUNT(*) FROM posts_serial WHERE id = $id";
             get_posts_serial_information.Parameters.AddWithValue("$id", postId);
-            var count = get_posts_serial_information.ExecuteScalar();
+            var count = get_posts_serial_information.ExecuteScalar()!;
             if (postId.Length != 6 || !int.TryParse(postId, out _)|| (long)count == 0)
             {
                 context.Response.StatusCode = 404;
                 await context.Response.SendFileAsync("./wwwroot/content_404.html");
                 return;
             }
-            // To be done: use the id check if the post exists
             context.Response.ContentType = "text/html";
             await context.Response.SendFileAsync("./wwwroot/webpost.html");
+        });
+
+        app.MapGet("/api/posts", async context =>
+        {
+            var posts = new List<object>();
+            var getPostsCommand = connection.CreateCommand();
+            getPostsCommand.CommandText = "SELECT * FROM posts_serial";
+            using (var reader = getPostsCommand.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    posts.Add(new
+                    {
+                        id = reader.GetInt32(0),
+                        title = reader.GetString(1),
+                        created_timestamp = reader.GetInt64(2),
+                        latest_timestamp = reader.GetInt64(3)
+                    });
+                }
+            }
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(posts);
         });
 
         //recieve post request from frontend and then insert it into the database.

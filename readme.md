@@ -12,7 +12,7 @@ Flamepost is an opensourced, web service project. It was aimed to be free, anony
 ## To-Do List
 
 - [X] Backend Refactor: API completion for applying to all the posts
-- [ ] Page Refactor: homepage display listing of the newest posted/replied post
+- [X] Page Refactor: homepage display listing of the newest posted/replied post
 - [ ] Page Refactor: aethesetics
 - [ ] Page Refactor: guidelines, unsecure post warnings, and disclaimer
 - [ ] Feature: Markdown rendering

@@ -179,6 +179,8 @@ function switchpage(toPage, direction = 'default'){
             onpage = toPage;
             break;
     }
+    const pageDisplayer = document.getElementById('onpage');
+    pageDisplayer.innerHTML = `Now On Page ${onpage+1}/${pages+1}`;
     generatePage();
 }
 function callUpAlert(message, isGood){

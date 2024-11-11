@@ -135,14 +135,20 @@ async function fetchData() {
 
 async function post(){
     //read the content of the post and send it to the backend
-    let content = { "content" : document.getElementsByClassName('post_area')[0].value};
-    const response = await fetch('/api/send/' + getSerial(),{
-        method : 'POST',
-        headers:{
-            'Content-Type':  'application/json'
-        },
-        body: JSON.stringify(content)
-    }).then(response => response.text());
+    const content = { "content" : document.getElementsByClassName('post_area')[0].value};
+    let response;
+    try {
+        response = await fetch('/api/send/' + getSerial(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(content)
+        }).then(response => response.text());
+    } catch (error) {
+        callUpAlert('Failed while posting: ' + error.message, false);
+        return;
+    }
     if (response === "post success"){
         callUpAlert("post success, page reload in 5 seconds", true);
         document.getElementsByClassName('post_area')[0].value = '';
@@ -150,6 +156,7 @@ async function post(){
             window.location.href = `/p/${getSerial()}?page=${onpage+1}`;
         }, 5000)
     }else{
+        response = response || 'unknown error, please contact the admin';
         callUpAlert(response, false);
     }
 

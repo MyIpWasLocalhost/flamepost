@@ -60,6 +60,7 @@ main {
 .grid-container {
     border: #ddd 2px solid;
     border-radius: 5px;
+    align-items: center;
 }
 
 .forum-category {
@@ -171,20 +172,31 @@ footer p {
 }
 
 @media (max-width: 800px) {
-    main {
-        padding: 10px;
+    * {
+        padding: 0px;
     }
 
-    .forum-category {
+    .grid-container{
         width: 100vw;
+        padding: 0px;
+    }    
+
+    .forum-category {
+        width: 90vw;
+        padding:0px;
+        margin-left:5vw;
+        margin-right:5vw;
+        margin-bottom: 20px;
     }
 
     .forum-category h2 {
         font-size: 1.5em;
+        margin-bottom: 5px;
     }
 
     .forum-category p {
         font-size: 1em;
+        margin-bottom: 5px;
     }
 
     .poster{
@@ -206,6 +218,13 @@ footer p {
         height: 5vh;
         left:5%;
         border-radius: 10px;
+    }
+
+    #alert{
+        position: sticky;
+        top:200px;
+        width: 100vw;
+        height: 50px;
     }
     
 }

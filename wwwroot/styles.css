@@ -109,3 +109,98 @@ footer p {
     font-size: 0.9em;
     color: #333;
 }
+
+#create_post {
+    position: sticky;
+    left:90vw;
+    top:80vh;
+    background-color: #dfca9f;
+    color: black;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    z-index: 1;
+    text-align: center;
+    font-size: 50px;
+    p{
+        position: relative;
+        top: -5px;
+    }
+}
+
+#postwindow{
+    overflow: hidden;
+    position: absolute;
+    background-color: azure;
+    width: 60vw;
+    height: 60vh;
+    z-index: 1;
+    border-radius: 20px;
+    border: blue 2px solid;
+    align-items: center;
+    text-align: center;
+    margin: 10px;
+}
+
+#postwindow h2{
+    position: relative;
+    top: -30px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+#title_label{
+    position: relative;
+    left: 25%;
+    top: -40px;
+    width: 50%;
+    margin: 10px;
+}
+
+#title{
+    position: relative;
+    top: -60px;
+    width: 80%;
+    font-size: 32px;
+    margin: 10px;
+}
+
+#content_label{
+    position: relative;
+    left: 25%;
+    top: -60px;
+    width: 50%;
+    margin: 10px;
+}
+
+#content{
+    position: relative;
+    top: -60px;
+    width: 80%;
+    height: 22vh;
+    margin: 10px;
+}
+
+#submit_button{
+    position: relative;
+    top: -40px;
+    left: 6vw;
+    width: 80%;
+    background-color: #90ee90;
+    color: black;
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+#close_button{
+    position: relative;
+    border-radius: 50%;
+    top: 10px;
+    left: 90%;
+    width: 30px;
+    height: 30px;
+    background-color: red;
+    color: white;
+    font-size: 20px;
+    z-index: 2;
+}

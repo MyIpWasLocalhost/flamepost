@@ -36,6 +36,37 @@ function generatepost(item){
     posts_generated++;
     return gridItem;
 }
+function callPostWindow(){
+    document.styleSheets[0].insertRule(`*{overflow:hidden;}`);
+    let postwindow = document.createElement('div');
+    postwindow.id = 'postwindow';
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const screenCenterX = window.innerWidth / 2 + scrollLeft;
+    const screenCenterY = window.innerHeight / 2 + scrollTop;
+    postwindow.style.left = `${screenCenterX}px`;
+    postwindow.style.top = `${screenCenterY}px`;
+    postwindow.style.transform = 'translate(-50%, -50%)';
+    postwindow.innerHTML = `
+        <div id="postwindow-content">
+            <div id="close_button" onclick = "closePostWindow()">x</div>
+            <h2>Create a new post</h2>
+                <div id = "title_label">Title</div>
+                <input type="text" id="title" name="title">
+                <p>\n</p>
+                <div id = "content_label">Content</div>
+                <textarea id="content" name="content"></textarea>
+                <div id = "submit_button">Create</div>
+        </div>
+    `;
+    document.body.appendChild(postwindow);
+    document.getElementById("create_post").style.display = "none";
+}
+function closePostWindow(){
+    document.getElementById("postwindow").remove();
+    document.styleSheets[0].deleteRule(0);
+    document.getElementById("create_post").style.display = "block";
+}
 window.onload = async function(){
     data = await fetchData();
     data.sort((a, b) => b.latest_timestamp - a.latest_timestamp);

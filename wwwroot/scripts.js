@@ -56,11 +56,33 @@ function callPostWindow(){
                 <p>\n</p>
                 <div id = "content_label">Content</div>
                 <textarea id="content" name="content"></textarea>
-                <div id = "submit_button">Create</div>
+                <div id = "submit_button" onclick="createPost()">Create</div>
         </div>
     `;
     document.body.appendChild(postwindow);
     document.getElementById("create_post").style.display = "none";
+}
+function createPost(){
+    let title = document.getElementById("title").value;
+    let content = document.getElementById("content").value;
+    let data = {
+        title: title,
+        content: content
+    };
+    let response = fetch("/api/create_post", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(response => response.text());
+    if (response === "post success"){
+        callUpAlert("post success, refreshing the page", true);
+        setTimeout(function(){
+            window.location.reload();
+        }, 5000)
+    }
+    closePostWindow();
 }
 function closePostWindow(){
     document.getElementById("postwindow").remove();

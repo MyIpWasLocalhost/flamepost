@@ -4,8 +4,14 @@ using Microsoft.Data.Sqlite;
 using System.Runtime;
 public class PostData
 {
-        public string content { get; set; } = string.Empty;
+    public string content { get; set; } = string.Empty;
 };
+
+public class PostGenerateData
+{
+    public string title { get; set; } = string.Empty;
+    public string content { get; set; } = string.Empty;
+}
 
 public partial class StartService
 {
@@ -179,6 +185,78 @@ public partial class StartService
             {
                 response =  "Unhandled case, please contact the developer.";
             }
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync(response);
+        });
+
+        app.MapPost("/api/create_post", async context =>
+        {
+            var postedData = await context.Request.ReadFromJsonAsync<PostGenerateData>();
+            string response = "";
+            if (!(string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200 || postedData.title.Length > 50 || string.IsNullOrWhiteSpace(postedData.title))){
+                
+                //read the database and get the latest post id
+                var getLatestPostIdCommand = connection.CreateCommand();
+                getLatestPostIdCommand.CommandText = "SELECT id FROM posts_serial ORDER BY id DESC LIMIT 1";
+                int thisPostId = Convert.ToInt32(getLatestPostIdCommand.ExecuteScalar());
+                thisPostId++;
+
+                //get variables for the new post
+                var createPostCommand = connection.CreateCommand();
+                var createPostSerialCommand = connection.CreateCommand();
+                long time = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+                //append the new post to the posts_serial
+                createPostSerialCommand.CommandText = @"
+                    INSERT INTO posts_serial (id, title, created_timestamp, latest_timestamp) VALUES ($id, $title, $created_timestamp, $latest_timestamp)";
+                createPostSerialCommand.Parameters.AddWithValue("$title", postedData.title);
+                createPostSerialCommand.Parameters.AddWithValue("$created_timestamp", time);
+                createPostSerialCommand.Parameters.AddWithValue("$latest_timestamp", time);
+                createPostSerialCommand.Parameters.AddWithValue("$id", thisPostId);
+                createPostSerialCommand.ExecuteNonQuery();
+
+                //create the table for the new post
+                string strPostId = thisPostId.ToString("D6");
+                createPostCommand.CommandText = @$"
+                    CREATE TABLE post_at_{strPostId} (
+                        content TEXT NOT NULL,
+                        author TEXT NOT NULL,
+                        tier INTEGER NOT NULL,
+                        timestamp INTEGER NOT NULL
+                    )";
+                createPostCommand.ExecuteNonQuery();
+                
+                //insert post content
+                var insertPostCommand = connection.CreateCommand();
+                insertPostCommand.CommandText = @$"
+                    INSERT INTO post_at_{strPostId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
+                insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
+                insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
+                insertPostCommand.Parameters.AddWithValue("$tier", 0);
+                insertPostCommand.Parameters.AddWithValue("$timestamp", time);
+                insertPostCommand.ExecuteNonQuery();
+                response = "post success";
+            }
+            else if (string.IsNullOrWhiteSpace(postedData.content))
+            {
+                response = "Content cannot be empty.";
+            }
+            else if (postedData.content.Length > 200)
+            {
+                response = "Content too long.";
+            }
+            else if (string.IsNullOrWhiteSpace(postedData.title))
+            {
+                response = "Title cannot be empty.";
+            }
+            else if (postedData.title.Length > 50)
+            {
+                response = "Title too long.";
+            }
+            else
+            {
+                response = "Unhandled case, please contact the developer.";
+            };
             context.Response.ContentType = "text/plain";
             await context.Response.WriteAsync(response);
         });

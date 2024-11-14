@@ -66,8 +66,8 @@ function createPost(){
     let title = document.getElementById("title").value;
     let content = document.getElementById("content").value;
     let data = {
-        title: title,
-        content: content
+        "title": title,
+        "content": content
     };
     let response = fetch("/api/create_post", {
         method: 'POST',

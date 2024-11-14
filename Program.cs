@@ -32,7 +32,9 @@ public partial class StartService
         createChartCommand.CommandText = @"
             CREATE TABLE IF NOT EXISTS posts_serial (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL
+                title TEXT NOT NULL,
+                created_timestamp INTEGER NOT NULL,
+                latest_timestamp INTEGER NOT NULL
             )";
         createChartCommand.ExecuteNonQuery();
 
@@ -188,18 +190,23 @@ public partial class StartService
             context.Response.ContentType = "text/plain";
             await context.Response.WriteAsync(response);
         });
-
+        
         app.MapPost("/api/create_post", async context =>
         {
             var postedData = await context.Request.ReadFromJsonAsync<PostGenerateData>();
             string response = "";
-            if (!(string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200 || postedData.title.Length > 50 || string.IsNullOrWhiteSpace(postedData.title))){
+            if (postedData != null && !(string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200 || postedData.title.Length > 50 || string.IsNullOrWhiteSpace(postedData.title))){
                 
                 //read the database and get the latest post id
                 var getLatestPostIdCommand = connection.CreateCommand();
                 getLatestPostIdCommand.CommandText = "SELECT id FROM posts_serial ORDER BY id DESC LIMIT 1";
-                int thisPostId = Convert.ToInt32(getLatestPostIdCommand.ExecuteScalar());
-                thisPostId++;
+                int thisPostId;
+                try{
+                    thisPostId = Convert.ToInt32(getLatestPostIdCommand.ExecuteScalar());
+                    thisPostId++;
+                }catch{
+                    thisPostId = 1;
+                }
 
                 //get variables for the new post
                 var createPostCommand = connection.CreateCommand();
@@ -225,7 +232,7 @@ public partial class StartService
                         timestamp INTEGER NOT NULL
                     )";
                 createPostCommand.ExecuteNonQuery();
-                
+
                 //insert post content
                 var insertPostCommand = connection.CreateCommand();
                 insertPostCommand.CommandText = @$"

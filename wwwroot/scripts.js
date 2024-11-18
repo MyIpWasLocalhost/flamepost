@@ -40,11 +40,8 @@ function callPostWindow(){
     document.styleSheets[0].insertRule(`*{overflow:hidden;}`);
     let postwindow = document.createElement('div');
     postwindow.id = 'postwindow';
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const screenCenterX = window.innerWidth / 2 + scrollLeft;
     const screenCenterY = window.innerHeight / 2 + scrollTop;
-    postwindow.style.left = `${screenCenterX}px`;
     postwindow.style.top = `${screenCenterY}px`;
     postwindow.style.transform = 'translate(-50%, -50%)';
     postwindow.innerHTML = `
@@ -53,7 +50,6 @@ function callPostWindow(){
             <h2>Create a new post</h2>
                 <div id = "title_label">Title</div>
                 <input type="text" id="title" name="title">
-                <p>\n</p>
                 <div id = "content_label">Content</div>
                 <textarea id="content" name="content"></textarea>
                 <div id = "submit_button" onclick="createPost()">Create</div>
@@ -62,27 +58,50 @@ function callPostWindow(){
     document.body.appendChild(postwindow);
     document.getElementById("create_post").style.display = "none";
 }
-function createPost(){
+function callUpAlert(message, isGood){
+    const alert = document.getElementById('alert');
+    const alertExisting = alert.style.visibility === 'visible';
+    alert.innerHTML = `<p>${message}</p>`;
+    alert.style.backgroundColor = isGood ? '#90ee90' : '#f8766d';
+    alert.style.visibility = 'visible';
+    alert.classList.add('scale-up-center');
+    if (!alertExisting){
+        setTimeout(function hidealert(){
+            alert.classList.remove('scale-up-center');
+            alert.style.visibility = 'hidden';
+        }, 5000);
+    }
+}
+async function createPost(){
     let title = document.getElementById("title").value;
     let content = document.getElementById("content").value;
     let data = {
         "title": title,
         "content": content
     };
-    let response = fetch("/api/create_post", {
+    closePostWindow();
+    let response;
+    try {
+        response = await fetch("/api/create_post", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
     }).then(response => response.text());
+    } catch (error) {
+        callUpAlert('Failed while posting: ' + error.message, false);
+        return;
+    }
     if (response === "post success"){
-        callUpAlert("post success, refreshing the page", true);
+        callUpAlert("post success, refreshing the page in 5s", true);
         setTimeout(function(){
             window.location.reload();
         }, 5000)
+    }else{
+        response = response || 'unknown error, please contact the admin';
+        callUpAlert(response, false);
     }
-    closePostWindow();
 }
 function closePostWindow(){
     document.getElementById("postwindow").remove();
@@ -108,4 +127,12 @@ window.addEventListener('scroll', function(){
             document.getElementById('grid-container').appendChild(gridItem);
             }
         }
-    });
+});
+window.addEventListener('keydown', function(event){
+    let postwindow_opened = Boolean(document.getElementById("postwindow"));
+    if (event.key === "Escape" && postwindow_opened){ 
+        closePostWindow();
+    }else if (event.key === "Enter" && postwindow_opened){
+        createPost();
+    }
+});

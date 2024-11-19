@@ -31,7 +31,8 @@ Flamepost is an opensourced, web service project. It was aimed to be free, anony
 
 ## Run the project
 
-0. Flamepost was designed on top of .NET CORE 8.0. Please correctly install the dependency.
+0. Flamepost was designed on top of .NET CORE 8.0. 
+   - Please correctly install the [runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
 1. clone the project：
 
    ```sh

@@ -204,3 +204,13 @@ function callUpAlert(message, isGood){
         }, 5000);
     }
 }
+window.addEventListener('keydown', function(e){
+    switch (e.key){
+        case 'ArrowLeft':
+            switchpage(0, 'left');
+            break;
+        case 'ArrowRight':
+            switchpage(0, 'right');
+            break;
+    }
+});

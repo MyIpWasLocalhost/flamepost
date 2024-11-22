@@ -28,8 +28,8 @@ function timestampToDate(timestamp){
 function createPostDisplay(item){
     const gridItem = document.createElement('div');
     let time = timestampToDate(item.timestamp);
-    item.author = escapeHtml(item.author);
-    item.content = escapeHtml(item.content);
+    item.author = item.author;
+    item.content = item.content;
     gridItem.className = 'forum-category';
     gridItem.innerHTML = `
         <h2>${item.author}</h2>
@@ -84,6 +84,12 @@ function generatePage(){
 async function fetchData() {
     const response = await fetch('/api/data/' + getSerial());
     data = await response.json();
+    data.forEach(function(item){
+        if (item.content || item.author){
+        item.content = escapeHtml(item.content);
+        item.author = escapeHtml(item.author);
+        }
+    });
     replyAmount = Object.keys(data).length -1;
     pages = Math.floor( (replyAmount -1 ) / 10 );
     if (onpage > pages){

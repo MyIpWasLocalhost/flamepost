@@ -30,7 +30,7 @@ function generatepost(item){
     let url = `/p/${id}`;
     gridItem.className = 'post_display';
     gridItem.innerHTML = `
-        <h2><a href="${url}">${item.title}</a></h2>
+        <h2><a href="${url}">${escapeHtml(item.title)}</a></h2>
         <p>posted at ${created_time}, replied at ${latest_time}</p>
     `;
     posts_generated++;

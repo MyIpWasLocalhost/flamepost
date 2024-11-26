@@ -28,8 +28,6 @@ function timestampToDate(timestamp){
 function createPostDisplay(item){
     const gridItem = document.createElement('div');
     let time = timestampToDate(item.timestamp);
-    item.author = item.author;
-    item.content = item.content;
     gridItem.className = 'forum-category';
     gridItem.innerHTML = `
         <h2>${item.author}</h2>
@@ -90,6 +88,7 @@ async function fetchData() {
         item.author = escapeHtml(item.author);
         }
     });
+    document.title = `WebPost - ${escapeHtml(data[0].title)}`;
     replyAmount = Object.keys(data).length -1;
     pages = Math.floor( (replyAmount -1 ) / 10 );
     if (onpage > pages){

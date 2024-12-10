@@ -1,9 +1,11 @@
 //create variable for currentpage and total pages
 var onpage = 0
 var pages = 0
-var data, replyAmount;
+var data, replyAmount, md;
 
 window.onload = function(){
+    //initialize the markdown parser
+    md = window.markdownit();
     //get the current page from the url
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('page')){
@@ -28,10 +30,11 @@ function timestampToDate(timestamp){
 function createPostDisplay(item){
     const gridItem = document.createElement('div');
     let time = timestampToDate(item.timestamp);
+    let content = md.render(item.content);
     gridItem.className = 'forum-category';
     gridItem.innerHTML = `
         <h2>${item.author}</h2>
-        <p>${item.content}</p>
+        <p>${content}</p>
         <p id="serial">#${item.tier+1}, posted at ${time}</p>
     `;
     return gridItem;

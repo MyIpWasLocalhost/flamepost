@@ -27,7 +27,7 @@ public partial class StartService
         var connection = new SqliteConnection(connectionString);
         connection.Open();
 
-        //create chart to hold all the titles and post id
+        //create chart to hold all the titles and post id if not exists
         var createChartCommand = connection.CreateCommand();
         createChartCommand.CommandText = @"
             CREATE TABLE IF NOT EXISTS posts_serial (
@@ -52,13 +52,15 @@ public partial class StartService
                     context.Response.StatusCode = 404;
                     await context.Response.SendFileAsync("./wwwroot/content_404.html");
                     return;
-                }else{
+                }
+                else
+                {
                     posts.Add(new
                     {
-                        tier = "content_header",
-                        title = reader.GetString(1),
+                        tier              = "content_header",
+                        title             = reader.GetString(1),
                         created_timestamp = reader.GetInt64(2),
-                        latest_timestamp = reader.GetInt64(3)
+                        latest_timestamp  = reader.GetInt64(3)
                     });
                 }
             }
@@ -77,9 +79,9 @@ public partial class StartService
                     {
                         posts.Add(new
                         {
-                            content = reader.GetString(0),
-                            author = reader.GetString(1),
-                            tier = reader.GetInt32(2),
+                            content   = reader.GetString(0),
+                            author    = reader.GetString(1),
+                            tier      = reader.GetInt32(2),
                             timestamp = reader.GetInt64(3)
                         });
                     }
@@ -145,48 +147,71 @@ public partial class StartService
         app.MapPost("/api/send/{postId:regex(^\\d{{6}}$)}", async (HttpContext context, string postId) =>
         {
             var postedData = await context.Request.ReadFromJsonAsync<PostData>();
-            var response = "";
-            if (!(postedData == null || string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200 || postId.Length != 6 || !int.TryParse(postId, out _)))
-            {
-                var insertPostCommand = connection.CreateCommand();
-                var viewPostsCommand = connection.CreateCommand();
-                viewPostsCommand.CommandText = @$"SELECT COUNT(*) FROM post_at_{postId}";
-                var tier = viewPostsCommand.ExecuteScalar();
-                //insert post content
-                insertPostCommand.CommandText = @$"
-                    INSERT INTO post_at_{postId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
-                long time = DateTimeOffset.Now.ToUnixTimeSeconds();
-                insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
-                insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
-                insertPostCommand.Parameters.AddWithValue("$tier", tier);
-                insertPostCommand.Parameters.AddWithValue("$timestamp", time);
-                //update the post time in the post_serial
-                var updatePostTimeCommand = connection.CreateCommand();
-                updatePostTimeCommand.CommandText = @$"
-                    UPDATE posts_serial SET latest_timestamp = $new_timestamp WHERE id = $id";
-                updatePostTimeCommand.Parameters.AddWithValue("$new_timestamp", time);
-                updatePostTimeCommand.Parameters.AddWithValue("$id", postId);
-
-                updatePostTimeCommand.ExecuteNonQuery();
-                insertPostCommand.ExecuteNonQuery();
-                response = "post success";
-            }
-            //handle different errors
-            else if (postedData == null)
-            {
-                throw new Exception("Invalid data");
-            }
-            else if (string.IsNullOrWhiteSpace(postedData.content))
+            string response;
+            if (string.IsNullOrWhiteSpace(postedData?.content))
             {
                 response = "Content cannot be empty.";
             }
             else if (postedData.content.Length > 200)
             {
                 response = "Content too long.";
-            }else
-            {
-                response =  "Unhandled case, please contact the developer.";
             }
+            else if (postId.Length != 6 || !int.TryParse(postId, out _))
+            {
+                response = "Post not found.";
+            }
+            else
+            {
+                //check validility of the postId
+                var checkPostIdCommand = connection.CreateCommand();
+                checkPostIdCommand.CommandText = @$"SELECT COUNT(*) FROM posts_serial WHERE id = $id";
+                checkPostIdCommand.Parameters.AddWithValue("$id", postId);
+                long count = Convert.ToInt64(checkPostIdCommand.ExecuteScalar());
+                if (count! != 1)
+                {
+                    response = "Post not found or Post id is invalid.";
+                    return;
+                }
+
+                //if the post is found, get the tier of new adding post
+                var viewPostsCommand = connection.CreateCommand();
+                viewPostsCommand.CommandText = @$"SELECT COUNT(*) FROM post_at_{postId}";
+                var tier = viewPostsCommand.ExecuteScalar();
+
+                //register the command for inserting post content
+                var insertPostCommand = connection.CreateCommand();
+                insertPostCommand.CommandText = @$"
+                    INSERT INTO post_at_{postId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
+                long time = DateTimeOffset.Now.ToUnixTimeSeconds();
+                insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
+                //TODO: add author name customization
+                insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
+                insertPostCommand.Parameters.AddWithValue("$tier", tier);
+                insertPostCommand.Parameters.AddWithValue("$timestamp", time);
+                
+                //register the command for update the post time in the post_serial
+                var updatePostTimeCommand = connection.CreateCommand();
+                updatePostTimeCommand.CommandText = @$"
+                    UPDATE posts_serial SET latest_timestamp = $new_timestamp WHERE id = $id";
+                updatePostTimeCommand.Parameters.AddWithValue("$new_timestamp", time);
+                updatePostTimeCommand.Parameters.AddWithValue("$id", postId);
+
+                try {
+                    updatePostTimeCommand.ExecuteNonQuery();
+                    insertPostCommand.ExecuteNonQuery();
+                }catch{
+                    response = "Post failed. Please contact the developer.";
+                    return;
+                }
+                response = "post success";
+                
+                //dispose the commands registered
+                checkPostIdCommand.Dispose();
+                viewPostsCommand.Dispose();
+                insertPostCommand.Dispose();
+                updatePostTimeCommand.Dispose();
+            }
+            response ??= "Post failed. Please contact the developer.";
             context.Response.ContentType = "text/plain";
             await context.Response.WriteAsync(response);
         });
@@ -194,57 +219,8 @@ public partial class StartService
         app.MapPost("/api/create_post", async context =>
         {
             var postedData = await context.Request.ReadFromJsonAsync<PostGenerateData>();
-            string response = "";
-            if (postedData != null && !(string.IsNullOrWhiteSpace(postedData.content) || postedData.content.Length > 200 || postedData.title.Length > 50 || string.IsNullOrWhiteSpace(postedData.title))){
-                
-                //read the database and get the latest post id
-                var getLatestPostIdCommand = connection.CreateCommand();
-                getLatestPostIdCommand.CommandText = "SELECT id FROM posts_serial ORDER BY id DESC LIMIT 1";
-                int thisPostId;
-                try{
-                    thisPostId = Convert.ToInt32(getLatestPostIdCommand.ExecuteScalar());
-                    thisPostId++;
-                }catch{
-                    thisPostId = 1;
-                }
-
-                //get variables for the new post
-                var createPostCommand = connection.CreateCommand();
-                var createPostSerialCommand = connection.CreateCommand();
-                long time = DateTimeOffset.Now.ToUnixTimeSeconds();
-
-                //append the new post to the posts_serial
-                createPostSerialCommand.CommandText = @"
-                    INSERT INTO posts_serial (id, title, created_timestamp, latest_timestamp) VALUES ($id, $title, $created_timestamp, $latest_timestamp)";
-                createPostSerialCommand.Parameters.AddWithValue("$title", postedData.title);
-                createPostSerialCommand.Parameters.AddWithValue("$created_timestamp", time);
-                createPostSerialCommand.Parameters.AddWithValue("$latest_timestamp", time);
-                createPostSerialCommand.Parameters.AddWithValue("$id", thisPostId);
-                createPostSerialCommand.ExecuteNonQuery();
-
-                //create the table for the new post
-                string strPostId = thisPostId.ToString("D6");
-                createPostCommand.CommandText = @$"
-                    CREATE TABLE post_at_{strPostId} (
-                        content TEXT NOT NULL,
-                        author TEXT NOT NULL,
-                        tier INTEGER NOT NULL,
-                        timestamp INTEGER NOT NULL
-                    )";
-                createPostCommand.ExecuteNonQuery();
-
-                //insert post content
-                var insertPostCommand = connection.CreateCommand();
-                insertPostCommand.CommandText = @$"
-                    INSERT INTO post_at_{strPostId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
-                insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
-                insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
-                insertPostCommand.Parameters.AddWithValue("$tier", 0);
-                insertPostCommand.Parameters.AddWithValue("$timestamp", time);
-                insertPostCommand.ExecuteNonQuery();
-                response = "post success";
-            }
-            else if (string.IsNullOrWhiteSpace(postedData.content))
+            string response;
+            if (string.IsNullOrWhiteSpace(postedData?.content))
             {
                 response = "Content cannot be empty.";
             }
@@ -261,9 +237,57 @@ public partial class StartService
                 response = "Title too long.";
             }
             else
-            {
-                response = "Unhandled case, please contact the developer.";
-            };
+            {        
+                //read the database and get the latest post id
+                var getLatestPostIdCommand = connection.CreateCommand();
+                getLatestPostIdCommand.CommandText = "SELECT id FROM posts_serial ORDER BY id DESC LIMIT 1";
+                object latestPostId = getLatestPostIdCommand.ExecuteScalar()?? "0";
+                int thisPostId = Convert.ToInt32(latestPostId) + 1;
+
+                //register command and variables for creating the new post
+                var createPostCommand = connection.CreateCommand();
+                var createPostSerialCommand = connection.CreateCommand();
+                long time = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+                //append the new post to the posts_serial
+                createPostSerialCommand.CommandText = @"
+                    INSERT INTO posts_serial (id, title, created_timestamp, latest_timestamp) VALUES ($id, $title, $created_timestamp, $latest_timestamp)";
+                createPostSerialCommand.Parameters.AddWithValue("$title", postedData.title);
+                createPostSerialCommand.Parameters.AddWithValue("$created_timestamp", time);
+                createPostSerialCommand.Parameters.AddWithValue("$latest_timestamp", time);
+                createPostSerialCommand.Parameters.AddWithValue("$id", thisPostId);
+
+                //create the table for the new post
+                string strPostId = thisPostId.ToString("D6");
+                createPostCommand.CommandText = @$"
+                    CREATE TABLE post_at_{strPostId} (
+                        content TEXT NOT NULL,
+                        author TEXT NOT NULL,
+                        tier INTEGER NOT NULL,
+                        timestamp INTEGER NOT NULL
+                    )";
+                createPostSerialCommand.ExecuteNonQuery();
+                createPostCommand.ExecuteNonQuery();
+                
+                var insertPostCommand = connection.CreateCommand();
+                insertPostCommand.CommandText = @$"
+                    INSERT INTO post_at_{strPostId} (content, author, tier, timestamp) VALUES ($content, $author, $tier, $timestamp)";
+                insertPostCommand.Parameters.AddWithValue("$content", postedData.content);
+                insertPostCommand.Parameters.AddWithValue("$author", "Anonymous User");
+                insertPostCommand.Parameters.AddWithValue("$tier", 0);
+                insertPostCommand.Parameters.AddWithValue("$timestamp", time);
+
+                insertPostCommand.ExecuteNonQuery();
+                response = "post success";
+
+                //dispose the commands registered
+                getLatestPostIdCommand.Dispose();
+                createPostCommand.Dispose();
+                createPostSerialCommand.Dispose();
+                insertPostCommand.Dispose();
+            }
+            //if unexpected error occurs, return a default message
+            response ??= "Post failed. Please contact the developer.";
             context.Response.ContentType = "text/plain";
             await context.Response.WriteAsync(response);
         });

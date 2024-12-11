@@ -75,6 +75,11 @@ function callUpAlert(message, isGood){
 async function createPost(){
     let title = document.getElementById("title").value;
     let content = document.getElementById("content").value;
+    if (title == "" || title == ""){
+        callUpAlert("Content cannot be empty", false);
+        closePostWindow();
+        return;
+    }
     let data = {
         "title": title,
         "content": content

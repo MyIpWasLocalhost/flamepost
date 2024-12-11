@@ -145,6 +145,10 @@ async function post(){
     //read the content of the post and send it to the backend
     const content = { "content" : document.getElementsByClassName('post_area')[0].value};
     let response;
+    if (content.content == ""){
+        callUpAlert('Content cannot be empty', false);
+        return;
+    }
     try {
         response = await fetch('/api/send/' + getSerial(), {
             method: 'POST',

@@ -95,6 +95,16 @@ main {
     border-radius: 5px;
 }
 
+.forum-category li{
+    margin: 5px;
+    margin-left: 50px;
+}
+
+.forum-category li::marker{
+    color: white;
+    font-weight: bold;
+}
+
 #serial{
     font-size: 0.6em;
 }

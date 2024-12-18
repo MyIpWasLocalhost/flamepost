@@ -13,12 +13,12 @@ public class PostGenerateData
     public string content { get; set; } = string.Empty;
 }
 
-public partial class StartService
+public class StartService
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
         //initialize the web application
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder();
         var app = builder.Build();
         app.UseRouting();
 

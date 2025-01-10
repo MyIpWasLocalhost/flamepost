@@ -37,21 +37,25 @@ function generatepost(item){
     return gridItem;
 }
 function callPostWindow(){
-    document.styleSheets[0].insertRule(`*{overflow:hidden;}`);
-    let postwindow = document.createElement('div');
-    postwindow.id = 'postwindow';
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const screenCenterY = window.innerHeight / 2 + scrollTop;
+    document.styleSheets[0].insertRule(`*{overflow:hidden;}`);
+    const overlay = document.getElementById('dark-layer');
+    overlay.style.top = `${scrollTop}px`;
+    overlay.style.visibility = 'visible';
+    let postwindow = document.createElement('div');
+    postwindow.id = 'postwindow';
     postwindow.style.top = `${screenCenterY}px`;
     postwindow.style.transform = 'translate(-50%, -50%)';
     postwindow.innerHTML = `
         <div id="postwindow-content">
-            <div id="close_button" onclick = "closePostWindow()">x</div>
+            <div id="close_button" onclick = "closePostWindow()">
+                <img src="/xmark.svg">
+            </div>
             <h2>Create a new post</h2>
-                <div id = "title_label">Title</div>
-                <input type="text" id="title" name="title">
-                <div id = "content_label">Content</div>
-                <textarea id="content" name="content"></textarea>
+                <br>
+                <input type="text" id="title" name="title" placeholder="Please Enter Title Here">
+                <textarea id="content" name="content" placeholder="Type Content here..."></textarea>
                 <div id = "submit_button" onclick="createPost()">Create</div>
         </div>
     `;
@@ -112,6 +116,8 @@ function closePostWindow(){
     document.getElementById("postwindow").remove();
     document.styleSheets[0].deleteRule(0);
     document.getElementById("create_post").style.display = "block";
+    const overlay = document.getElementById('dark-layer');
+    overlay.style.visibility = 'hidden';
 }
 window.onload = async function(){
     data = await fetchData();

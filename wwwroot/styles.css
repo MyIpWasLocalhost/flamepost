@@ -7,6 +7,17 @@
     font-family: 'Vera Sans Mono', monospace;
 }
 
+#dark-layer{
+    position : absolute;
+    visibility: hidden;
+    top : 0;
+    left : 0;
+    width : 100vw;
+    height : 100vh;
+    background-color : rgba(0, 0, 0, 0.5);
+    z-index : 1;
+}
+
 main {
     font-family: Arial, sans-serif;
     background-color: #333;
@@ -131,13 +142,12 @@ footer p {
 #postwindow{
     overflow: hidden;
     position: absolute;
-    background-color: azure;
+    background-color: #B1ACB3;
     left: 50vw;
     width: 60vw;
-    height: 60vh;
-    z-index: 1;
-    border-radius: 20px;
-    border: blue 2px solid;
+    height: 50vh;
+    z-index: 2;
+    border: black 2px solid;
     align-items: center;
     text-align: center;
     margin: 10px;
@@ -184,24 +194,20 @@ footer p {
 
 #submit_button{
     position: relative;
-    top: -40px;
+    top: -50px;
     left: 10%;
     width: 80%;
     background-color: #90ee90;
     color: black;
-    border-radius: 10px;
     font-size: 20px;
 }
 
 #close_button{
     position: relative;
-    border-radius: 50%;
     top: 10px;
     left: 90%;
-    width: 30px;
-    height: 30px;
-    background-color: red;
-    color: white;
+    width: 60px;
+    height: 60px;
     font-size: 20px;
     z-index: 2;
 }

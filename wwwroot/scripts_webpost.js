@@ -79,6 +79,74 @@ function generatePage(){
                 gridContainer.appendChild(gridItem);
         }
     }
+
+    const pageContainer = document.getElementById('switchPageContainer');
+    pageContainer.innerHTML = '';
+    //+2 for prev and next button
+    if (pages > 4){
+        for (i = onpage-2; i <= onpage + 2; i++){
+            const page = document.createElement('button');
+            page.className = 'switchPage';
+            switch (i){
+                case onpage-2:
+                    page.innerHTML = '<';
+                    page.onclick = function(){
+                        switchpage(0, 'left');
+                    }
+                    break;
+                case onpage:
+                    page.innerHTML = '<input id=jump_page></input>';
+                    page.onclick = function(){
+                        let topage = document.getElementById('jump_page').value;
+                        if (topage === '' || isNaN(topage)){
+                            return;
+                        }
+                        switchpage(topage-1);
+                    }
+                    break;
+                case onpage+2:
+                    page.innerHTML = '>';
+                    page.onclick = function(){
+                        switchpage(0, 'right');
+                    }
+                    break;
+                default:
+                    if (i<0 || i>=onpage+2 || i>pages){
+                        continue;
+                    }
+                    page.innerHTML = i + 1;
+                    page.onclick = function(){
+                        switchpage(page.innerHTML-1);
+                    }
+            }
+            pageContainer.appendChild(page);
+        }
+    }else{
+        for (i = 0; i <= pages+2; i++){
+            const page = document.createElement('button');
+            page.className = 'switchPage';
+            switch (i){
+                case 0:
+                    page.innerHTML = '<';
+                    page.onclick = function(){
+                        switchpage(0, 'left');
+                    }
+                    break;
+                case pages+2:
+                    page.innerHTML = '>';
+                    page.onclick = function(){
+                        switchpage(0, 'right');
+                    }
+                    break;
+                default:
+                    page.innerHTML = i;
+                    page.onclick = function(){
+                        switchpage(page.innerHTML-1);
+                    }
+            }
+            pageContainer.appendChild(page);
+        }
+    }
 }
 
 //get the data from the backend and generating the forum posts
@@ -103,33 +171,7 @@ async function fetchData() {
     //call function to generate the page
     generatePage(data, replyAmount);
     //handling the generation of the page switcher
-    const pageContainer = document.getElementById('switchPageContainer');
-    //+2 for prev and next button
-    for (i = 0; i <= pages+2; i++){
-        const page = document.createElement('button');
-        page.className = 'switchPage';
-        switch (i){
-            case 0:
-                page.innerHTML = '<';
-                page.onclick = function(){
-                    switchpage(0, 'left');
-                }
-                break;
-            case pages+2:
-                page.innerHTML = '>';
-                page.onclick = function(){
-                    switchpage(0, 'right');
-                }
-                break;
-            default:
-                page.innerHTML = i;
-                page.onclick = function(){
-                    switchpage(page.innerHTML-1);
-                }
-        }
-        pageContainer.appendChild(page);
-        
-    }
+
     const titleHolder = document.getElementById('title');
     let title = escapeHtml(data[0].title);
     let created_time = timestampToDate(data[0].created_timestamp);
@@ -177,6 +219,10 @@ async function post(){
 
 //function for switching pages
 function switchpage(toPage, direction = 'default'){
+    if (toPage > pages || toPage < 0){
+        callUpAlert('Page not found', false);
+        return;
+    }
     switch (direction){
         case 'right':
             if (onpage < pages){
